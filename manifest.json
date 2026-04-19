@@ -1,0 +1,17 @@
+{
+  "name": "Resumai",
+  "short_name": "Resumai",
+  "description": "AI-Powered Resume Builder",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#8b5cf6",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
