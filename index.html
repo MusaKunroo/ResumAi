@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Resumai</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Dashboard Screen -->
+        <section id="screen-dashboard" class="animate-up">
+            <header style="margin-bottom: 30px; text-align: center;">
+                <img src="C:/Users/Musa/.gemini/antigravity/brain/5aa08327-7cbc-49da-8664-782e6d91c0ba/resume_app_logo_1776619679813.png" alt="Logo" style="width: 80px; height: 80px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);">
+                <h1>Resumai</h1>
+                <p class="dim">Select a profile to start tailoring.</p>
+            </header>
+
+            <div class="dashboard-tabs" style="display:flex; justify-content:center; gap: 10px; margin-bottom: 20px;">
+                <button class="btn btn-tab active" id="tab-profiles" onclick="app.switchTab('profiles')">Profiles</button>
+                <button class="btn btn-tab" id="tab-resumes" onclick="app.switchTab('resumes')">Saved Resumes</button>
+            </div>
+
+            <div id="profile-list">
+                <!-- Profiles will be injected here -->
+            </div>
+            
+            <div id="saved-resumes-list" class="hidden">
+                <!-- Saved Resumes will be injected here -->
+            </div>
+
+            <button class="btn btn-secondary" onclick="app.createNewProfile()">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+                Create New Profile
+            </button>
+        </section>
+
+        <!-- Profile Setup Screen -->
+        <section id="screen-profile-setup" class="hidden animate-up">
+            <header style="margin-bottom: 20px;">
+                <button class="btn btn-secondary" style="width: auto; padding: 8px 12px;" onclick="app.showScreen('dashboard')">Back</button>
+                <h1 style="margin-top: 15px;">Configure Profile</h1>
+                <p class="dim">Detailed info leads to better resumes.</p>
+            </header>
+
+            <div class="glass-card" style="margin-bottom: 20px; border: 1px dashed var(--primary);">
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">Already have a resume? Let AI fill the form for you.</p>
+                <button class="btn btn-secondary" onclick="document.getElementById('resume-import-file').click()">
+                    <svg class="nav-icon" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+                    Import from Existing Resume
+                </button>
+                <input type="file" id="resume-import-file" accept="image/*,application/pdf" style="display:none" onchange="app.handleResumeImport(this)">
+                <div id="import-status" class="dim" style="font-size: 0.8rem; margin-top: 10px; text-align: center;"></div>
+            </div>
+
+            <form id="profile-form">
+                <!-- 1. Identification & Contact -->
+                <div class="accordion-item">
+                    <button type="button" class="accordion-header" onclick="app.toggleAccordion(this)">
+                        1. Identification & Contact
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="input-group">
+                            <label>Full Legal Name <span style="color: red;">*</span> <span class="optional-tag">(per Government ID)</span></label>
+                            <input type="text" name="fullName" placeholder="John Doe" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Permanent Address</label>
+                            <input type="text" name="permanentAddress" placeholder="Nai Basti, Anantnag...">
+                        </div>
+                        <div class="input-group">
+                            <label>Current Residential Address</label>
+                            <input type="text" name="currentAddress" placeholder="Same as above">
+                        </div>
+                        <div class="field-row">
+                            <div class="input-group">
+                                <label>Primary Phone <span style="color: red;">*</span></label>
+                                <input type="tel" name="phone1" placeholder="+91 1234567890" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Secondary Phone</label>
+                                <input type="tel" name="phone2" placeholder="+91 0987654321">
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Professional Email <span style="color: red;">*</span></label>
+                            <input type="email" name="email" placeholder="email@example.com" required>
+                        </div>
+                        <div class="input-group">
+                            <label>LinkedIn Profile URL</label>
+                            <input type="url" name="linkedin" placeholder="https://linkedin.com/in/username">
+                        </div>
+                        <div class="input-group">
+                            <label>Portfolio / GitHub URL</label>
+                            <input type="url" name="portfolio" placeholder="https://github.com/username">
+                        </div>
+                        <div class="field-row">
+                            <div class="input-group">
+                                <label>Citizenship</label>
+                                <input type="text" name="citizenship" placeholder="Indian">
+                            </div>
+                            <div class="input-group">
+                                <label>Visa Expiry <span class="optional-tag">(if any)</span></label>
+                                <input type="text" name="visaExpiry" placeholder="N/A">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Detailed Work History -->
+                <div class="accordion-item">
+                    <button type="button" class="accordion-header" onclick="app.toggleAccordion(this)">
+                        2. Work History & Performance
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <p class="dim" style="margin-bottom:15px">Tip: Focus on impact metrics like percentages and saved time.</p>
+                        <div class="input-group">
+                            <label>Professional Summary <span class="optional-tag">(High-level overview)</span></label>
+                            <textarea name="summary" rows="4" placeholder="Experienced professional with 10+ years..."></textarea>
+                        </div>
+                        <div class="input-group">
+                            <label>Core Competencies</label>
+                            <div id="competencies-container" class="dynamic-container"></div>
+                            <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 5px;" onclick="app.addDynamicRow('competencies')">+ Add Competency</button>
+                        </div>
+                        <div class="input-group">
+                            <label>Detailed Roles & Achievements</label>
+                            <div id="experience-container" class="dynamic-container"></div>
+                            <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 5px;" onclick="app.addDynamicRow('experience')">+ Add Role</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Academic Record -->
+                <div class="accordion-item">
+                    <button type="button" class="accordion-header" onclick="app.toggleAccordion(this)">
+                        3. Academic Record
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="input-group">
+                            <label>Degrees & Institutions</label>
+                            <div id="education-container" class="dynamic-container"></div>
+                            <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 5px;" onclick="app.addDynamicRow('education')">+ Add Education</button>
+                        </div>
+                        <div class="input-group">
+                            <label>Standardized Test Scores</label>
+                            <div id="testScores-container" class="dynamic-container"></div>
+                            <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 5px;" onclick="app.addDynamicRow('testScores')">+ Add Score</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Projects & Credentials -->
+                <div class="accordion-item">
+                    <button type="button" class="accordion-header" onclick="app.toggleAccordion(this)">
+                        4. Projects & Credentials
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="input-group">
+                            <label>Key Projects & Links</label>
+                            <div id="projects-container" class="dynamic-container"></div>
+                            <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 5px;" onclick="app.addDynamicRow('projects')">+ Add Project</button>
+                        </div>
+                        <div class="input-group">
+                            <label>Certifications</label>
+                            <div id="certifications-container" class="dynamic-container"></div>
+                            <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 5px;" onclick="app.addDynamicRow('certifications')">+ Add Certification</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. References & Availability -->
+                <div class="accordion-item">
+                    <button type="button" class="accordion-header" onclick="app.toggleAccordion(this)">
+                        5. References & Logistics
+                        <span>+</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="input-group">
+                            <label>References</label>
+                            <div id="references-container" class="dynamic-container"></div>
+                            <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 5px;" onclick="app.addDynamicRow('references')">+ Add Reference</button>
+                        </div>
+                        <div class="field-row">
+                            <div class="input-group">
+                                <label>Notice Period</label>
+                                <input type="text" name="noticePeriod" placeholder="30 days">
+                            </div>
+                            <div class="input-group">
+                                <label>Willingness to Relocate</label>
+                                <select name="relocation">
+                                    <option value="Yes">Yes</option>
+                                    <option value="No">No</option>
+                                    <option value="Specific Cities">Specific Cities Only</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label>Preferred Work Format</label>
+                            <select name="workFormat">
+                                <option value="Remote">Remote</option>
+                                <option value="Hybrid">Hybrid</option>
+                                <option value="On-site">On-site</option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Languages & Proficiency</label>
+                            <div id="languages-container" class="dynamic-container"></div>
+                            <button type="button" class="btn btn-secondary" style="width: auto; padding: 6px 12px; font-size: 0.8rem; margin-top: 5px;" onclick="app.addDynamicRow('languages')">+ Add Language</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: 30px;">Save Profile</button>
+            </form>
+        </section>
+
+        <!-- JD Scanner Screen -->
+        <section id="screen-jd-scanner" class="hidden animate-up">
+            <header style="margin-bottom: 20px;">
+                <button class="btn btn-secondary" style="width: auto; padding: 8px 12px;" onclick="app.showScreen('dashboard')">Cancel</button>
+                <h1 style="margin-top: 15px;">Target Job</h1>
+                <p class="dim">Paste JD or upload an advertisement image.</p>
+            </header>
+
+            <div class="glass-card">
+                <div class="input-group">
+                    <label>Job Description Text</label>
+                    <textarea id="jd-text" rows="8" placeholder="Paste the job requirements here..."></textarea>
+                </div>
+                
+                <div style="text-align: center; margin: 20px 0; color: var(--text-dim);">— OR —</div>
+                
+                <div class="input-group">
+                    <label>Upload JD Image</label>
+                    <input type="file" id="jd-image" accept="image/*" style="padding: 10px;">
+                </div>
+            </div>
+            
+            <button class="btn btn-primary" onclick="app.generateResume()">
+                <svg class="nav-icon" viewBox="0 0 24 24"><path d="M13 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V9z"/><path d="M13 2v7h7"/><path d="M12 18v-6M9 15l3 3 3-3"/></svg>
+                Generate Tailored Resume
+            </button>
+        </section>
+
+        <!-- Generation Screen -->
+        <section id="screen-generation" class="hidden animate-up" style="text-align: center; padding-top: 50px;">
+            <div class="profile-avatar" style="width: 80px; height: 80px; margin: 0 auto 30px; font-size: 2rem;">AI</div>
+            <h1>Tailoring your resume...</h1>
+            <p class="dim">Matching your experience with the job requirements using the selected Gemini model.</p>
+            
+            <div style="margin-top: 40px;">
+                <div class="btn btn-secondary" style="pointer-events: none;">
+                    <span id="gen-status">Analyzing Job Description...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Screen -->
+        <section id="screen-result" class="hidden animate-up">
+            <header style="margin-bottom: 20px;">
+                <h1>Success!</h1>
+                <p class="dim">Your tailored resume is ready.</p>
+            </header>
+
+            <div class="glass-card">
+                <div class="input-group">
+                    <label>Resume Name</label>
+                    <input type="text" id="result-filename" placeholder="e.g. My_Resume">
+                </div>
+                
+                <div style="height: 150px; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.2); border-radius: 12px; margin-bottom: 20px;">
+                    <div style="text-align: center;">
+                        <svg class="nav-icon" style="width: 48px; height: 48px; margin-bottom: 10px;" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>
+                        <p class="dim">PDF Ready</p>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" id="share-btn" onclick="app.shareResume()">
+                    <svg class="nav-icon" viewBox="0 0 24 24"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8M16 6l-4-4-4 4M12 2v13"/></svg>
+                    Share / Send
+                </button>
+                
+                <div class="field-row" style="margin-top: 10px;">
+                    <button class="btn btn-secondary" onclick="app.saveResumeToDb()">Save to App</button>
+                    <button class="btn btn-secondary" onclick="app.downloadResume()">Download</button>
+                </div>
+                
+                <button class="btn btn-secondary" style="margin-top: 10px; border: none;" onclick="app.showScreen('dashboard')">Back to Dashboard</button>
+            </div>
+        </section>
+
+        <!-- Settings Screen -->
+        <section id="screen-settings" class="hidden animate-up">
+            <header style="margin-bottom: 20px;">
+                <h1>App Settings</h1>
+            </header>
+            <div class="glass-card">
+                <div class="input-group">
+                    <label>Gemini API Key</label>
+                    <input type="password" id="api-key" placeholder="Paste your Google API Key here">
+                </div>
+                <div class="input-group">
+                    <label>Gemini Model</label>
+                    <select id="api-model">
+                        <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommended)</option>
+                        <option value="gemini-2.5-pro">Gemini 2.5 Pro (More Detailed)</option>
+                        <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                    </select>
+                </div>
+                <p class="dim" style="font-size: 0.8rem;">Your key is stored locally and never sent to any server except Google Gemini.</p>
+            </div>
+            <button class="btn btn-primary" onclick="app.saveSettings()">Save Settings</button>
+            <button class="btn btn-secondary" style="margin-top: 10px;" onclick="app.debugListModels()">List Available Models (Debug)</button>
+            <div id="debug-output" class="dim" style="font-size: 0.7rem; margin-top: 10px; max-height: 100px; overflow-y: auto;"></div>
+        </section>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+        <a href="#" class="nav-item active" onclick="app.showScreen('dashboard', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg>
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item" onclick="app.showScreen('settings', this)">
+            <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span>Settings</span>
+        </a>
+    </nav>
+
+    <!-- Dynamic Templates -->
+    <template id="tpl-experience">
+        <div class="dynamic-row glass-card" style="margin-bottom: 15px; padding: 15px; position: relative; border: 1px solid rgba(255,255,255,0.1);">
+            <button type="button" onclick="app.removeDynamicRow(this)" style="position: absolute; top: 10px; right: 10px; background: rgba(255,50,50,0.1); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;" title="Remove Entry">×</button>
+            <div class="field-row" style="margin-right: 25px;">
+                <div class="input-group" style="flex: 2;">
+                    <label style="font-size: 0.75rem;">Role / Title</label>
+                    <input type="text" name="exp_role[]" placeholder="Software Engineer" onkeydown="app.handleDynamicEnter(event, 'experience')">
+                </div>
+                <div class="input-group" style="flex: 2;">
+                    <label style="font-size: 0.75rem;">Company</label>
+                    <input type="text" name="exp_company[]" placeholder="Google" onkeydown="app.handleDynamicEnter(event, 'experience')">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label style="font-size: 0.75rem;">Dates</label>
+                    <input type="text" name="exp_dates[]" placeholder="2020 - Present" onkeydown="app.handleDynamicEnter(event, 'experience')">
+                </div>
+            </div>
+            <div class="input-group" style="margin-top: 10px;">
+                <label style="font-size: 0.75rem;">Achievements</label>
+                <textarea name="exp_achievements[]" rows="2" placeholder="Increased revenue by 20%..."></textarea>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-education">
+        <div class="dynamic-row glass-card" style="margin-bottom: 15px; padding: 15px; position: relative; border: 1px solid rgba(255,255,255,0.1);">
+            <button type="button" onclick="app.removeDynamicRow(this)" style="position: absolute; top: 10px; right: 10px; background: rgba(255,50,50,0.1); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;" title="Remove Entry">×</button>
+            <div class="field-row" style="margin-right: 25px;">
+                <div class="input-group" style="flex: 2;">
+                    <label style="font-size: 0.75rem;">Institution</label>
+                    <input type="text" name="edu_institution[]" placeholder="University of..." onkeydown="app.handleDynamicEnter(event, 'education')">
+                </div>
+                <div class="input-group" style="flex: 2;">
+                    <label style="font-size: 0.75rem;">Degree / Major</label>
+                    <input type="text" name="edu_degree[]" placeholder="M.Sc. Dietetics" onkeydown="app.handleDynamicEnter(event, 'education')">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label style="font-size: 0.75rem;">Score <span class="optional-tag">(Opt.)</span></label>
+                    <input type="text" name="edu_score[]" placeholder="3.8 GPA" onkeydown="app.handleDynamicEnter(event, 'education')">
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-projects">
+        <div class="dynamic-row glass-card" style="margin-bottom: 15px; padding: 15px; position: relative; border: 1px solid rgba(255,255,255,0.1);">
+            <button type="button" onclick="app.removeDynamicRow(this)" style="position: absolute; top: 10px; right: 10px; background: rgba(255,50,50,0.1); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;" title="Remove Entry">×</button>
+            <div class="field-row" style="margin-right: 25px;">
+                <div class="input-group" style="flex: 1;">
+                    <label style="font-size: 0.75rem;">Project Name</label>
+                    <input type="text" name="proj_name[]" placeholder="Vaccine Manager" onkeydown="app.handleDynamicEnter(event, 'projects')">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label style="font-size: 0.75rem;">Link <span class="optional-tag">(Opt.)</span></label>
+                    <input type="text" name="proj_link[]" placeholder="github.com/..." onkeydown="app.handleDynamicEnter(event, 'projects')">
+                </div>
+            </div>
+            <div class="input-group" style="margin-top: 10px;">
+                <label style="font-size: 0.75rem;">Details</label>
+                <textarea name="proj_details[]" rows="2" placeholder="Briefly describe the tech stack and impact..."></textarea>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-testScores">
+        <div class="dynamic-row glass-card" style="margin-bottom: 15px; padding: 15px; position: relative; border: 1px solid rgba(255,255,255,0.1);">
+            <button type="button" onclick="app.removeDynamicRow(this)" style="position: absolute; top: 10px; right: 10px; background: rgba(255,50,50,0.1); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;" title="Remove Entry">×</button>
+            <div class="field-row" style="margin-right: 25px;">
+                <div class="input-group" style="flex: 1;">
+                    <label style="font-size: 0.75rem;">Test Name</label>
+                    <input type="text" name="test_name[]" placeholder="GRE / TOEFL" onkeydown="app.handleDynamicEnter(event, 'testScores')">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label style="font-size: 0.75rem;">Score</label>
+                    <input type="text" name="test_score[]" placeholder="320 / 110" onkeydown="app.handleDynamicEnter(event, 'testScores')">
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-references">
+        <div class="dynamic-row glass-card" style="margin-bottom: 15px; padding: 15px; position: relative; border: 1px solid rgba(255,255,255,0.1);">
+            <button type="button" onclick="app.removeDynamicRow(this)" style="position: absolute; top: 10px; right: 10px; background: rgba(255,50,50,0.1); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;" title="Remove Entry">×</button>
+            <div class="field-row" style="margin-right: 25px;">
+                <div class="input-group" style="flex: 1;">
+                    <label style="font-size: 0.75rem;">Name</label>
+                    <input type="text" name="ref_name[]" placeholder="Jane Doe" onkeydown="app.handleDynamicEnter(event, 'references')">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label style="font-size: 0.75rem;">Title & Company</label>
+                    <input type="text" name="ref_title[]" placeholder="Manager at Tech Corp" onkeydown="app.handleDynamicEnter(event, 'references')">
+                </div>
+                <div class="input-group" style="flex: 1;">
+                    <label style="font-size: 0.75rem;">Contact</label>
+                    <input type="text" name="ref_contact[]" placeholder="jane@example.com" onkeydown="app.handleDynamicEnter(event, 'references')">
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-competencies">
+        <div class="dynamic-row glass-card" style="margin-bottom: 10px; padding: 10px 15px; position: relative; border: 1px solid rgba(255,255,255,0.1);">
+            <button type="button" onclick="app.removeDynamicRow(this)" style="position: absolute; top: 10px; right: 10px; background: rgba(255,50,50,0.1); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;" title="Remove Entry">×</button>
+            <div class="input-group" style="margin-right: 25px; margin-bottom: 0;">
+                <input type="text" name="comp_name[]" placeholder="e.g. Project Management" onkeydown="app.handleDynamicEnter(event, 'competencies')">
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-certifications">
+        <div class="dynamic-row glass-card" style="margin-bottom: 10px; padding: 10px 15px; position: relative; border: 1px solid rgba(255,255,255,0.1);">
+            <button type="button" onclick="app.removeDynamicRow(this)" style="position: absolute; top: 10px; right: 10px; background: rgba(255,50,50,0.1); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;" title="Remove Entry">×</button>
+            <div class="input-group" style="margin-right: 25px; margin-bottom: 0;">
+                <input type="text" name="cert_name[]" placeholder="e.g. AWS Certified Developer" onkeydown="app.handleDynamicEnter(event, 'certifications')">
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-languages">
+        <div class="dynamic-row glass-card" style="margin-bottom: 10px; padding: 10px 15px; position: relative; border: 1px solid rgba(255,255,255,0.1);">
+            <button type="button" onclick="app.removeDynamicRow(this)" style="position: absolute; top: 10px; right: 10px; background: rgba(255,50,50,0.1); color: #ff5555; border: 1px solid rgba(255,50,50,0.3); border-radius: 50%; width: 24px; height: 24px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold;" title="Remove Entry">×</button>
+            <div class="field-row" style="margin-right: 25px; margin-bottom: 0;">
+                <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                    <input type="text" name="lang_name[]" placeholder="Language (e.g. English)" onkeydown="app.handleDynamicEnter(event, 'languages')">
+                </div>
+                <div class="input-group" style="flex: 1; margin-bottom: 0;">
+                    <input type="text" name="lang_prof[]" placeholder="Proficiency (e.g. Fluent)" onkeydown="app.handleDynamicEnter(event, 'languages')">
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="db.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

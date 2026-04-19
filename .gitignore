@@ -1,0 +1,7 @@
+# Temporary debug scripts
+test-latex.js
+
+# IDE/System files
+.vscode/
+.DS_Store
+Thumbs.db
