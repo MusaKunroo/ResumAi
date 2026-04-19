@@ -1,4 +1,4 @@
-const CACHE_NAME = 'resumai-v1';
+const CACHE_NAME = 'resumai-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -16,11 +16,12 @@ self.addEventListener('install', event => {
 });
 
 self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request).then(response => {
-      return response || fetch(event.request).catch(() => {
-        // Fallback for offline if needed
-      });
-    })
-  );
+  // Only handle internal assets, let external APIs (Gemini, LaTeX) bypass the service worker
+  if (event.request.url.startsWith(self.location.origin)) {
+    event.respondWith(
+      caches.match(event.request).then(response => {
+        return response || fetch(event.request);
+      })
+    );
+  }
 });

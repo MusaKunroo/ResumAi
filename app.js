@@ -650,36 +650,45 @@ const app = {
     },
 
     async convertToPdf(latex) {
-        // We use latex-on-http API which supports POST requests, avoiding URI length limits
-        const url = 'https://latex.ytotech.com/builds/sync';
-        
-        const payload = {
-            compiler: "pdflatex",
-            resources: [
-                {
-                    main: true,
-                    content: latex
-                }
-            ]
-        };
+        // Try Primary API (ytotech)
+        try {
+            const url = 'https://latex.ytotech.com/builds/sync';
+            const payload = {
+                compiler: "pdflatex",
+                resources: [{ main: true, content: latex }]
+            };
 
-        const res = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        
-        if (!res.ok) {
-            // Provide a fallback option in the error if PDF generation fails so user can save the LaTeX code
-            console.error(await res.text());
-            throw new Error('LaTeX conversion service failed. Try again or copy the LaTeX syntax manually.');
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            
+            if (res.ok) {
+                const blob = await res.blob();
+                return { url: URL.createObjectURL(blob), blob: blob };
+            }
+        } catch (e) {
+            console.warn('Primary PDF API failed, trying fallback...', e);
         }
-        
-        const blob = await res.blob();
-        return {
-            url: URL.createObjectURL(blob),
-            blob: blob
-        };
+
+        // Fallback API (latexonline.cc)
+        try {
+            const res = await fetch('https://latexonline.cc/compile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: 'text=' + encodeURIComponent(latex)
+            });
+
+            if (res.ok) {
+                const blob = await res.blob();
+                return { url: URL.createObjectURL(blob), blob: blob };
+            }
+        } catch (e) {
+            console.error('Fallback PDF API failed', e);
+        }
+
+        throw new Error('PDF conversion failed on all services. Please try again or copy the LaTeX code manually.');
     },
 
     toBase64(file) {
