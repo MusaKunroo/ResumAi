@@ -346,13 +346,25 @@ const app = {
                 competencies: [{name: ""}]
                 certifications: [{name: ""}]
                 languages: [{name: "", prof: ""}]
+                
+                IMPORTANT: Return ONLY the JSON object. No conversational text before or after. Ensure all property names are double-quoted.
             `;
 
             const mimeType = file.type === 'application/pdf' ? 'application/pdf' : 'image/jpeg';
-            const jsonResponse = await this.fetchGemini(prompt, [base64.split(',')[1]], mimeType);
+            const rawResponse = await this.fetchGemini(prompt, [base64.split(',')[1]], mimeType);
             
-            // Extract JSON from response (handling potential markdown wrappers)
-            const jsonString = jsonResponse.replace(/```json/g, '').replace(/```/g, '').trim();
+            // Robust JSON extraction
+            let jsonString = rawResponse;
+            const startIdx = jsonString.indexOf('{');
+            const endIdx = jsonString.lastIndexOf('}');
+            
+            if (startIdx !== -1 && endIdx !== -1) {
+                jsonString = jsonString.substring(startIdx, endIdx + 1);
+            }
+            
+            // Final cleaning of potential markdown or weird characters
+            jsonString = jsonString.replace(/```json/g, '').replace(/```/g, '').trim();
+            
             const data = JSON.parse(jsonString);
 
             this.autoFillForm(data);
