@@ -429,6 +429,7 @@ const app = {
     async generateResume() {
         const jdText = document.getElementById('jd-text').value;
         const jdFile = document.getElementById('jd-image').files[0];
+        const jdPreferences = document.getElementById('jd-preferences').value;
         const profile = this.state.profiles[this.state.activeProfileIndex];
 
         if (!this.state.apiKey) {
@@ -456,7 +457,7 @@ const app = {
 
             // Step 2: Generate LaTeX with Gemini
             statusEl.innerText = 'Tailoring Resume with AI...';
-            const latexCode = await this.callGemini(profile, extractedJd);
+            const latexCode = await this.callGemini(profile, extractedJd, jdPreferences);
 
             // Step 3: Convert LaTeX to PDF
             statusEl.innerText = 'Converting to PDF...';
@@ -575,7 +576,7 @@ const app = {
         return response;
     },
 
-    async callGemini(profile, jd) {
+    async callGemini(profile, jd, preferences = '') {
         const prompt = `
             You are an expert resume writer. Create a professional LaTeX resume using the specific structure of the provided sample.
             
@@ -597,6 +598,10 @@ const app = {
 
             TARGET JOB DESCRIPTION:
             ${jd}
+            
+            ${preferences ? `USER CUSTOM PREFERENCES / INSTRUCTIONS (STRICTLY OBEY THESE):
+            ${preferences}
+            ` : ''}
 
             LATEX STRUCTURE REQUIREMENTS (Strictly follow this order):
             1. HEADER: Name (Large, Centered), Address, Mobile, Email (links).

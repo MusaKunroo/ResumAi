@@ -245,6 +245,11 @@
                     <label>Upload JD Image</label>
                     <input type="file" id="jd-image" accept="image/*" style="padding: 10px;">
                 </div>
+                
+                <div class="input-group" style="margin-top: 20px;">
+                    <label>Custom Preferences</label>
+                    <textarea id="jd-preferences" rows="3" placeholder="Let AI know what kind of a resume you want (e.g. 'dont mention any summary', 'strictly dont lie about resume', etc)"></textarea>
+                </div>
             </div>
             
             <button class="btn btn-primary" onclick="app.generateResume()">
